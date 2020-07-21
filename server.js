@@ -16,7 +16,7 @@ console.log('Starting the server');
 app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
 
 app.use('/posts', require('./routes/postRoutes'));
-app.use('/feedback',require('./routes/postfeedback'));
+app.use('/feedback', require('./routes/postfeedback'));
 
 console.log('Connecting to MongoDB');
 mongoose.connect(
@@ -27,12 +27,13 @@ mongoose.connect(
     console.log('MongoDB connection established');
   }
 );
-app.use(function(req, res, next) {
+
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
