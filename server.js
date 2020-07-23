@@ -17,6 +17,7 @@ app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
 
 app.use('/posts', require('./routes/postRoutes'));
 app.use('/feedback', require('./routes/postfeedback'));
+app.use('/home',require('./routes/getHome'));
 
 console.log('Connecting to MongoDB');
 mongoose.connect(
