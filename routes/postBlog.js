@@ -1,23 +1,21 @@
-const router = require('express').Router();
+const express = require('express');
 const Blog = require('../models/BlogModal');
+const bodyParser = require('body-parser');
+const blogRouter = express.Router();
 
-router.post('/', async (req, res) => {
-  const { name, email, link, contentState } = req.body;
-
-  const newBlog = new Blog({
-    name,
-    email,
-    link,
-    content,
-  });
-  console.log(req.body);
-
-  try {
-    const savedBlog = await newBlog.save();
-    res.json(savedBlog);
-  } catch (err) {
-    console.log('error');
-  }
+blogRouter.use(bodyParser.json());
+blogRouter.route('/').post((req, res, next) => {
+  Blog.create(req.body)
+    .then(
+      (blog) => {
+        console.log('Blog Created ', blog);
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(blog);
+      },
+      (err) => next(err)
+    )
+    .catch((err) => next(err));
 });
 
-module.exports = router;
+module.exports = blogRouter;
