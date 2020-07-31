@@ -15,13 +15,7 @@ app.use(bodyParser.json());
 const PORT = process.env.PORT || 5000;
 console.log('Starting the server');
 app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/api/feedback', require('./routes/postfeedback'));
-app.use('/api/data', require('./routes/getHome'));
-app.use('/api/Blog',require('./routes/postBlog'));
-app.get('*', (req,res) =>{
-  res.sendFile(path.join(__dirname+'/public/index.html'));
-});
+
 
 
 console.log('Connecting to MongoDB');
@@ -33,6 +27,35 @@ mongoose.connect(
     console.log('MongoDB connection established');
   }
 );
+function auth (req, res, next) {
+  var authHeader = req.headers.authorization;
+  if (!authHeader) {
+      var err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      next(err);
+      return;
+  }
+
+  var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+  var user = auth[0];
+  var pass = auth[1];
+  if (user == process.env.api_user && pass == process.env.api_pass) {
+      next(); // authorized
+  } else {
+      var err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');      
+      err.status = 401;
+      next(err);
+  }
+}
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api/feedback',auth, require('./routes/postfeedback'));
+app.use('/api/data',auth, require('./routes/getHome'));
+app.use('/api/Blog',auth,require('./routes/postBlog'));
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/public/index.html'));
+});
 
 app.use(function (req, res, next) {
   next(createError(404));
